@@ -592,7 +592,7 @@ class AudioSegment(object):
         log_conversion(conversion_command)
 
         with open(os.devnull, 'rb') as devnull:
-            p = subprocess.Popen(conversion_command, stdin=devnull, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(conversion_command, stdin=devnull, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         p_out, p_err = p.communicate()
 
         log_subprocess_output(p_out)
@@ -668,7 +668,7 @@ class AudioSegment(object):
         read_ahead_limit = kwargs.get('read_ahead_limit', -1)
         if filename:
             conversion_command += ["-i", filename]
-            stdin_parameter = None
+            stdin_parameter = subprocess.DEVNULL
             stdin_data = None
         else:
             if cls.converter == 'ffmpeg':
@@ -714,7 +714,7 @@ class AudioSegment(object):
         log_conversion(conversion_command)
 
         p = subprocess.Popen(conversion_command, stdin=stdin_parameter,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         p_out, p_err = p.communicate(input=stdin_data)
 
         if p.returncode != 0 or len(p_out) == 0:
@@ -901,7 +901,7 @@ class AudioSegment(object):
 
         # read stdin / write stdout
         with open(os.devnull, 'rb') as devnull:
-            p = subprocess.Popen(conversion_command, stdin=devnull, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(conversion_command, stdin=devnull, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         p_out, p_err = p.communicate()
 
         log_subprocess_output(p_out)

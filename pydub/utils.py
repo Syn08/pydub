@@ -3,6 +3,7 @@ from __future__ import division
 import json
 import os
 import re
+import subprocess
 import sys
 from subprocess import Popen, PIPE
 from math import log, ceil
@@ -255,7 +256,7 @@ def mediainfo_json(filepath, read_ahead_limit=-1):
     ]
     try:
         command_args += [fsdecode(filepath)]
-        stdin_parameter = None
+        stdin_parameter = subprocess.DEVNULL
         stdin_data = None
     except TypeError:
         if prober == 'ffprobe':
@@ -271,7 +272,7 @@ def mediainfo_json(filepath, read_ahead_limit=-1):
             file.close()
 
     command = [prober, '-of', 'json'] + command_args
-    res = Popen(command, stdin=stdin_parameter, stdout=PIPE, stderr=PIPE)
+    res = Popen(command, stdin=stdin_parameter, stdout=PIPE, stderr=PIPE, creationflags=0x08000000)
     output, stderr = res.communicate(input=stdin_data)
     output = output.decode("utf-8", 'ignore')
     stderr = stderr.decode("utf-8", 'ignore')
@@ -331,12 +332,12 @@ def mediainfo(filepath):
     ]
 
     command = [prober, '-of', 'old'] + command_args
-    res = Popen(command, stdout=PIPE)
+    res = Popen(command, stdout=PIPE, creationflags=0x08000000)
     output = res.communicate()[0].decode("utf-8")
 
     if res.returncode != 0:
         command = [prober] + command_args
-        output = Popen(command, stdout=PIPE).communicate()[0].decode("utf-8")
+        output = Popen(command, stdout=PIPE, creationflags=0x08000000).communicate()[0].decode("utf-8")
 
     rgx = re.compile(r"(?:(?P<inner_dict>.*?):)?(?P<key>.*?)\=(?P<value>.*?)$")
     info = {}
@@ -382,7 +383,7 @@ def cache_codecs(function):
 def get_supported_codecs():
     encoder = get_encoder_name()
     command = [encoder, "-codecs"]
-    res = Popen(command, stdout=PIPE, stderr=PIPE)
+    res = Popen(command, stdout=PIPE, stderr=PIPE, creationflags=0x08000000)
     output = res.communicate()[0].decode("utf-8")
     if res.returncode != 0:
         return []
